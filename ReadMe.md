@@ -7,7 +7,12 @@ Model
 
 ## Wiring Details
 
-- Red - Red - VCC
-- Black - Black - GND
-- Yellow - Blue - TX
-- White - Green - RX
+
+
+ESP  | WIRE  | WIRE
+---- | ----- | ----
+D0  | RED  | VCC
+GND |  BLK |  GND 
+D1  |  BLU |  Tx     
+D2  |  GRN |  Rx  
+
