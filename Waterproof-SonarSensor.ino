@@ -3,14 +3,14 @@
 #include <SoftwareSerial.h>
 
 /*
- ---------------------------
- | ESP     WIRE      SONAR |
- ---------------------------
- D0   = RED RED = VCC
- GND  = BLK BLK = GND
- D1   = BLU YLW = Tx 
- D2   = GRN WHT = Rx 
- ---------------------------
+---------------------------
+| ESP  |  WIRE  |  SONAR  |
+---------------------------
+| D0   |  RED   |  VCC    |
+| GND  |  BLK   |  GND    |
+| D1   |  BLU   |  Tx     |
+| D2   |  GRN   |  Rx     |
+---------------------------
 */
 
 SoftwareSerial mySerial(D2, D1); // RX, TX
@@ -18,24 +18,23 @@ SoftwareSerial mySerial(D2, D1); // RX, TX
 unsigned char data[4] = {};
 
 void setup() {
+  pinMode(D0, OUTPUT);
+  digitalWrite(D0, HIGH);
   Serial.begin(115200);
-  mySerial.begin(9600); 
+  mySerial.begin(9600);
 }
 
 float readDistance() {
-  do {
+  if (mySerial.available() >= 4) {
     for (int i = 0; i < 4; i++) {
       data[i] = mySerial.read();
     }
-  } while (mySerial.read() == 0xff);
-
-  mySerial.flush();
-
-  if (data[0] == 0xff) {
-    int sum = (data[0] + data[1] + data[2]) & 0x00FF;
-    if (sum == data[3]) {
-      float distance = (data[1] << 8) + data[2];
-      return distance / 10;
+    if (data[0] == 0xff) {
+      int sum = (data[0] + data[1] + data[2]) & 0xFF;
+      if (sum == data[3]) {
+        int distance = (data[1] << 8) + data[2];
+        return distance / 10.0;
+      }
     }
   }
 
@@ -43,10 +42,13 @@ float readDistance() {
 }
 
 void loop() {
-  float distance = readDistance();
-  if (distance >=0) {
-    Serial.println(distance);
-  }  
+  float distanceInCm = readDistance();
+  
+  if (distanceInCm >= 0) {
+    Serial.println(distanceInCm);
+  } else {
+    Serial.println("Invalid data");
+  }
 
   delay(100);
 }
